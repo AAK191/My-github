@@ -1,0 +1,15 @@
+# Ignore a file
+secret.txt
+
+# Ignore all .log files
+*.log
+
+# Ignore a folder
+node_modules/
+
+# Ignore all files in a folder
+build/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
