@@ -1,0 +1,58 @@
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  height: 60px;
+  padding: 0 32px;
+
+  background-color: #161b22;
+  border-bottom: 1px solid #30363d;
+}
+
+/* LEFT SIDE (logo + text) */
+nav a {
+  text-decoration: none;
+}
+
+nav > a > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+nav img {
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+}
+
+nav h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e6edf3;
+  letter-spacing: 0.5px;
+}
+
+/* RIGHT SIDE */
+nav > div {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+nav p {
+  font-size: 14px;
+  font-weight: 500;
+  color: #c9d1d9;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+nav p:hover {
+  color: #58a6ff;
+}
