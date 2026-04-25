@@ -52,6 +52,7 @@ async function signup(req, res) {
             repositories: [],
             followedUsers: [],
             startRepos: [],
+
         }
 
         const result = await usersCollection.insertOne(newUser);
@@ -209,9 +210,6 @@ async function followUser(req, res) {
     const targetUserId = req.params.id;
     const { currentUserId } = req.body;
 
-    console.log("params:", req.params);
-    console.log("body:", req.body);
-
     if (!ObjectId.isValid(targetUserId) || !ObjectId.isValid(currentUserId)) {
         return res.status(400).json({ error: "Invalid user ID" });
     }
@@ -232,28 +230,24 @@ async function followUser(req, res) {
             return res.status(404).json({ error: "User not found" });
         }
 
-        // followers may not exist yet on old documents, so default to []
-        const followers = targetUser.followers || [];
-        const isAlreadyFollowing = followers.map(id => id.toString()).includes(currentUserId);
+        // ✅ use followedUsers instead of followers/following
+        const followedUsers = currentUser.followedUsers || [];
+        const isAlreadyFollowing = followedUsers
+            .map(id => id.toString())
+            .includes(targetUserId);
 
         if (isAlreadyFollowing) {
-            await usersCollection.updateOne(
-                { _id: new ObjectId(targetUserId) },
-                { $pull: { followers: new ObjectId(currentUserId) } }
-            );
+            // Unfollow
             await usersCollection.updateOne(
                 { _id: new ObjectId(currentUserId) },
-                { $pull: { following: new ObjectId(targetUserId) } }
+                { $pull: { followedUsers: new ObjectId(targetUserId) } }
             );
             return res.json({ message: "Unfollowed", following: false });
         } else {
-            await usersCollection.updateOne(
-                { _id: new ObjectId(targetUserId) },
-                { $push: { followers: new ObjectId(currentUserId) } }
-            );
+            // Follow
             await usersCollection.updateOne(
                 { _id: new ObjectId(currentUserId) },
-                { $push: { following: new ObjectId(targetUserId) } }
+                { $push: { followedUsers: new ObjectId(targetUserId) } }
             );
             return res.json({ message: "Followed", following: true });
         }
@@ -263,6 +257,29 @@ async function followUser(req, res) {
         res.status(500).send("Server error");
     }
 }
+
+
+async function getUserProfile(req, res) {
+    const currentID = req.params.id;
+    try {
+        await connectClient();
+        const db = client.db("my-github");
+        const usersCollection = db.collection("users");
+        const user = await usersCollection.findOne({ _id: new ObjectId(currentID) });
+
+        if (!user) {
+            return res.status(400).json({ message: "user not found" });
+        }
+
+        return res.json({
+            ...user,
+            followedUsers: user.followedUsers || [],
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
 
 
 module.exports = {

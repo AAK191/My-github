@@ -22,14 +22,6 @@ const userSchema = new Schema({
            ref: "Repository", 
         },
     ],
-    repositories:[
-        {
-           default: [],
-           type: Schema.Types.ObjectId,
-           ref: "Repository", 
-        },
-
-    ],
     FollowedUsers:[
         {
            default: [],

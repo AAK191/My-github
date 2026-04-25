@@ -1,5 +1,6 @@
 # Ignore a file
 secret.txt
+.env
 
 # Ignore all .log files
 *.log

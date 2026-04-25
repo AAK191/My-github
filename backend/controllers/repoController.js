@@ -111,7 +111,8 @@ async function fetchRepositoryForCurrentUser(req, res) {
     const userId = req.params.userID;
 
     try {
-        const repositories = await Repository.find({ owner: userId });
+        const repositories = await Repository.find({ owner: userId })
+        .populate("owner");
 
          if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ error: "Invalid user ID" });
@@ -151,7 +152,7 @@ async function updateRepositoryById(req, res) {
 
     } catch (err) {
         console.log("Error during repository creation: ", err);
-        res.status(500).send("Server error");
+        res.status(500).json("Server error");
 
     }
 }

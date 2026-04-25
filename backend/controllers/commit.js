@@ -1,8 +1,9 @@
 const fs = require('fs').promises;
 const path = require('path');
 const { v4: uuidv4 } = require("uuid");
+const { supabase } = require("../config/supabaseClient"); 
 
-async function commitRepo(message){
+async function commitRepo(message, repoId, userId){
    const repoPath = path.resolve(process.cwd(),".my-github");
    const stagedPath = path.join(repoPath, "staging");
    const commitPath = path.join(repoPath, "commits");
@@ -24,6 +25,13 @@ async function commitRepo(message){
       path.join(commitDir, "commit.json"), 
       JSON.stringify({message, date: new Date().toISOString()})
    );
+
+   await supabase.from("commits").insert({
+      id: commitID,
+      repo_id: repoId,
+      user_id: userId,
+      message,
+    });
 
     console.log(`commit ${commitID} created with message: ${message}`);
 

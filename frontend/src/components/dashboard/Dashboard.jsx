@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";  // ✅ imported
+import { useNavigate } from "react-router-dom";
 import "./dashboard.css";
 import Navbar from "../Navbar";
 
@@ -9,7 +9,9 @@ const Dashboard = () => {
   const [suggestedRepositories, setSuggestedRepositories] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const navigate = useNavigate();
-  const loggedInUserId = localStorage.getItem("userId");  // ✅ defined
+  const loggedInUserId = localStorage.getItem("userId");
+
+  const [allRepositories, setAllRepositories] = useState([]);
 
   useEffect(() => {
     const fetchRepositories = async () => {
@@ -28,9 +30,13 @@ const Dashboard = () => {
       try {
         const response = await fetch(`http://localhost:3000/repo/all`);
         const data = await response.json();
+        console.log("All repos data:", data);
+        console.log("First repo owner:", data[0]?.owner);
+        setAllRepositories(Array.isArray(data) ? data : []);
+
         const others = data.filter(repo => {
           const ownerId = repo.owner?._id || repo.owner;
-          return ownerId?.toString() !== loggedInUserId;  // ✅ now defined
+          return ownerId?.toString() !== loggedInUserId;
         });
         setSuggestedRepositories(others);
       } catch (err) {
@@ -46,19 +52,21 @@ const Dashboard = () => {
     if (searchQuery === "") {
       setSearchResults(repositories);
     } else {
-      setSearchResults(repositories.filter(repo =>
-        repo?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      ));
+      const filtered = allRepositories.filter(repo =>
+        repo?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        repo?.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        repo?.owner?.username?.toLowerCase().includes(searchQuery.toLowerCase())
+      ); setSearchResults(filtered);
     }
-  }, [searchQuery, repositories]);
+  }, [searchQuery, repositories, allRepositories]);
 
   const handleSuggestedRepoClick = (repo) => {
-    const ownerId = repo.owner?._id || repo.owner;
-    navigate(`/profile/${ownerId}`);
+    navigate(`/repo/${repo._id}`);
   };
 
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+
       <section className="navbar-container">
         <Navbar />
       </section>
@@ -82,24 +90,40 @@ const Dashboard = () => {
         </aside>
 
         <main>
-          <h2>Your Repositories</h2>
+          <h2>{searchQuery ? "Search Results" : "Your Repositories"}</h2>  {/* ✅ dynamic title */}
           <div id="search">
-            <input type="text" value={searchQuery}
-              placeholder="Search..."
+            <input
+              type="text"
+              value={searchQuery}
+              placeholder="Search repositories, descriptions, users..."
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          {repositories.length === 0 && <p>No repositories yet. Create one!</p>}
-          {searchResults.map((repo) => (
-            <div key={repo._id} className="repo-card"
-              onClick={() => navigate(`/repo/${repo._id}`)}
-              style={{ cursor: "pointer" }}
-            >
-              <h4>{repo.name}</h4>
-              <p>{repo.description}</p>
-              <small>{repo.visibility ? "🔓 Public" : "🔒 Private"}</small>
-            </div>
-          ))}
+
+          {searchResults.length === 0 && searchQuery && (
+            <p style={{ color: "#8b949e" }}>No repositories found for "{searchQuery}"</p>
+          )}
+          {repositories.length === 0 && !searchQuery && (
+            <p>No repositories yet. Create one!</p>
+          )}
+
+          {searchResults.map((repo) => {
+            
+            const ownerName = repo.owner?.username || "Unknown";             return (
+              <div
+                key={repo._id}
+                className="repo-card"
+                onClick={() => navigate(`/repo/${repo._id}`)}
+              >
+                <h4>{repo.name}</h4>
+                <p>{repo.description || "No description"}</p>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <small>{repo.visibility ? "Public" : "Private"}</small>
+                  <small style={{ color: "#58a6ff" }}>by {ownerName}</small> {/* ✅ */}
+                </div>
+              </div>
+            );
+          })}
         </main>
 
         <aside>
@@ -111,7 +135,7 @@ const Dashboard = () => {
           </ul>
         </aside>
       </section>
-    </>
+    </div>
   );
 };
 

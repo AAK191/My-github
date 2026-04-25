@@ -1,0 +1,20 @@
+.repo-delete-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 5rem;
+}
+
+.repo-delete-btn {
+    padding: 10px 18px;
+    background-color: #b91c1c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.repo-delete-btn:hover {
+    background-color: #dc2626;
+}
