@@ -13,7 +13,6 @@ I challenged myself to rebuild core GitHub features from scratch — handling au
 
 ---
 
-## 📸 Screenshots
 
 
 
